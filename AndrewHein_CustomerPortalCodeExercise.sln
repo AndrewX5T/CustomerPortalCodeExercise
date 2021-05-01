@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31205.134
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndrewHein_CustomerPortalCodeExercise", "AndrewHein_CustomerPortalCodeExercise\AndrewHein_CustomerPortalCodeExercise.csproj", "{C82F44E7-52C8-4834-88E4-165D5E9A3289}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndrewHein_CustomerPortalCodeExercise_DataAccessLayer", "AndrewHein_CustomerPortalCodeExercise_DataAccessLayer\AndrewHein_CustomerPortalCodeExercise_DataAccessLayer.csproj", "{1EE34898-D451-48D7-8863-0CD03D4FEC73}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C82F44E7-52C8-4834-88E4-165D5E9A3289}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C82F44E7-52C8-4834-88E4-165D5E9A3289}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C82F44E7-52C8-4834-88E4-165D5E9A3289}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C82F44E7-52C8-4834-88E4-165D5E9A3289}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EE34898-D451-48D7-8863-0CD03D4FEC73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EE34898-D451-48D7-8863-0CD03D4FEC73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EE34898-D451-48D7-8863-0CD03D4FEC73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EE34898-D451-48D7-8863-0CD03D4FEC73}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {57B56EB9-2F62-49CF-B634-71CB37539B38}
+	EndGlobalSection
+EndGlobal
