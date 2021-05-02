@@ -1,4 +1,5 @@
 ﻿using CustomerPortalCodeExercise.Models;
+using DataAccessLayer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -18,8 +19,10 @@ namespace CustomerPortalCodeExercise.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public IActionResult Index([FromServices] IHashingService service)
         {
+            Console.WriteLine($"Testing hashing service: 'testpassword' to {service.Hash("testpassword")}");
+
             return View();
         }
 

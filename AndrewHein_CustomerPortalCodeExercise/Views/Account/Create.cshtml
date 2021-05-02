@@ -1,0 +1,21 @@
+﻿@model UserAccount 
+@{
+    ViewData["Title"] = "Create Account";
+}
+
+<form>
+    <label asp-for="FirstName">First Name</label>
+    <input asp-for="FirstName" />
+
+    <label asp-for="LastName">Last Name</label>
+    <input asp-for="LastName" />
+
+    <label asp-for="Email">Email</label>
+    <input asp-for="Email" />
+
+    <label for="textPassword"></label>
+    <input id="textPassword" type="password" name="password" />
+
+    <label for="textVerifyPassword"></label>
+    <input id="textVerifyPassword" type="password" name="verifyPassword" />
+</form>
