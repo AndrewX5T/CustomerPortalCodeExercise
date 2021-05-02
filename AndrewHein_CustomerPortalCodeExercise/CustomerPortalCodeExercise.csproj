@@ -19,4 +19,8 @@
   <ItemGroup>
     <ProjectReference Include="..\AndrewHein_CustomerPortalCodeExercise_DataAccessLayer\DataAccessLayer.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Store\" />
+  </ItemGroup>
 </Project>

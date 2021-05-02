@@ -27,12 +27,15 @@ namespace CustomerPortalCodeExercise
 
             services.AddRazorPages();
 
-            services.AddSingleton(typeof(IHashingService), typeof(HashingService));
+            services.AddScoped(typeof(IHashingService), typeof(HashingService));
+
             services.AddSingleton(typeof(IAccountStoringService), typeof(AccountStoringService));
+
+            services.AddSingleton(typeof(IAccountService), typeof(AccountService));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHashingService hasher, IAccountStoringService accountStorer)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHashingService hasher, IAccountStoringService accountStore)
         {
             if (env.IsDevelopment())
             {
@@ -55,6 +58,15 @@ namespace CustomerPortalCodeExercise
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
+
+            IAccountStoringService store = app
+                .ApplicationServices
+                .GetRequiredService<IAccountStoringService>();
+
+            //Initialize the account service, try to read the Account.json file if it exists
+            app.ApplicationServices
+                .GetRequiredService<IAccountService>()
+                .LoadAccounts(store);
         }
     }
 }

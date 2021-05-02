@@ -1,21 +1,33 @@
-﻿@model UserAccount 
+﻿@model UserAccountBuilder
 @{
     ViewData["Title"] = "Create Account";
 }
 
-<form>
-    <label asp-for="FirstName">First Name</label>
-    <input asp-for="FirstName" />
+<form class="row" asp-controller="Account" asp-action="Create" method="post">
+    @if ((bool)ViewData["accountFailure"])
+    {
+        <p class="col-12">@ViewData["failureReason"]</p>
+    }
 
-    <label asp-for="LastName">Last Name</label>
-    <input asp-for="LastName" />
+    <label class="col-md-3 col-12" asp-for="firstName">First Name</label>
+    <input class="col-md-9 col-12" asp-for="firstName" />
 
-    <label asp-for="Email">Email</label>
-    <input asp-for="Email" />
+    <label class="col-md-3 col-12" asp-for="lastName">Last Name</label>
+    <input class="col-md-9 col-12" asp-for="lastName" />
 
-    <label for="textPassword"></label>
-    <input id="textPassword" type="password" name="password" />
+    <label class="col-md-3 col-12" asp-for="email">Email Address</label>
+    <input class="col-md-9 col-12" asp-for="email" />
 
-    <label for="textVerifyPassword"></label>
-    <input id="textVerifyPassword" type="password" name="verifyPassword" />
+    <label class="col-md-3 col-12" asp-for="password">Password</label>
+    <input class="col-md-9 col-12" asp-for="password" />
+
+    <label class="col-md-3 col-12" asp-for="verifyPassword">Verify Password</label>
+    <input class="col-md-9 col-12" asp-for="verifyPassword" />
+
+    @if ((bool)ViewData["accountFailure"])
+    {
+        <p class="col-12">@ViewData["failureReason"]</p>
+    }
+
+    <input class="col-md-8 col-12" type="submit" />
 </form>

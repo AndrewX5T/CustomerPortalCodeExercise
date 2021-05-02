@@ -1,6 +1,8 @@
 ﻿using CustomerPortalCodeExercise.Models;
+using DataAccessLayer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,19 +12,29 @@ namespace CustomerPortalCodeExercise.Controllers
 {
     public class AccountController : Controller
     {
-        [HttpGet]
-        [Route("Account/Login")]
+        // GET: AccountController/Login
         public ActionResult Login()
         {
             return View();
         }
 
+        // POST: AccountController/Login
         [HttpPost]
-        [Route("Account/Login")]
         [ValidateAntiForgeryToken]
-        public ActionResult Login(IFormCollection form)
+        public ActionResult Login(
+            [FromForm] LoginAttempt loginAttempt,
+            [FromServices] IAccountService accountService,
+            [FromServices] IHashingService hasher
+            )
         {
-            var form1 = form;
+            //attempt to safely get the login details and pass them to the account service
+            //if the credentials are valid and the account exists, store the account identifier in session
+            //not a secure practice, of course.
+
+            if(loginAttempt.AttemptAccount(accountService, hasher, out UserAccount loginAccount))
+            {
+                PerformLoginUser(loginAccount);
+            }
 
             return View();
         }
@@ -36,20 +48,37 @@ namespace CustomerPortalCodeExercise.Controllers
         // GET: AccountController/Create
         public ActionResult Create()
         {
+            //ViewData vars used to report validation issues
+            ViewData["accountFailure"] = false;
+            ViewData["failureReason"] = string.Empty;
+
             return View();
         }
 
         // POST: AccountController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection form) 
+        public ActionResult Create(
+            [FromForm] UserAccountBuilder userAccountAttempt,
+            [FromServices] IAccountService accountService,
+            [FromServices] IAccountStoringService accountStore,
+            [FromServices] IHashingService hasher
+            ) 
         {
-            try
+            //create the account from the form data
+            UserAccount user = userAccountAttempt.CreateUserAccount(hasher);
+
+            //pass the account to the service to validate and add it
+            if (accountService.AddAccount(user, accountStore))
             {
-                return RedirectToAction(nameof(Index));
+                //direct user to login (new account created)
+                return RedirectToAction("Login");
             }
-            catch
+            else
             {
+                //prompt user that account creation failed
+                ViewData["accountFailure"] = true;
+                ViewData["failureReason"] = "Email already in use.";
                 return View();
             }
         }
@@ -94,6 +123,32 @@ namespace CustomerPortalCodeExercise.Controllers
             {
                 return View();
             }
+        }
+
+        private UserAccount PerformLoginUser(UserAccount account)
+        {
+            ISession session = ControllerContext.HttpContext.Session;
+
+            session.Set("userAuthToken", account.Identifier.ToByteArray());
+
+            return account;
+        }
+
+        private bool ReadLoginUser(IAccountService accountService, out UserAccount account)
+        {
+            ISession session = ControllerContext.HttpContext.Session;
+
+            byte[] userAuthToken = session.Get("userAuthToken");
+
+            if (userAuthToken != null)
+            {
+                Guid identifier = new Guid(userAuthToken);
+
+                return accountService.AccountExists(identifier, out account);
+            }
+
+            account = null;
+            return false;
         }
     }
 }

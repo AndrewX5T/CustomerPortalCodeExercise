@@ -8,9 +8,9 @@ namespace DataAccessLayer
 {
     public interface IAccountStoringService
     {
-        public void StoreAccounts<T>(IEnumerable<T> accounts);
+        public IAccountStoringService StoreAccounts<T>(HashSet<T> accounts);
 
-        public IEnumerable<T> GetAccounts<T>();
+        public HashSet<T> GetAccounts<T>();
     }
 
     public class AccountStoringService : IAccountStoringService, IServiceProvider
@@ -21,20 +21,25 @@ namespace DataAccessLayer
         }
 
         //Path to the accounts file
-        const string FLAT_FILE_PATH = @"./Accounts.json";
+        const string FLAT_FILE_PATH = @"./Store/Accounts.json";
 
-        public void StoreAccounts<T>(IEnumerable<T> accounts)
+        public IAccountStoringService StoreAccounts<T>(HashSet<T> accounts)
         {
-            JsonSerializerOptions jsonOpts = new JsonSerializerOptions(); //not going to change any of the defaults
+            JsonSerializerOptions jsonOpts = new JsonSerializerOptions()
+            {
+                WriteIndented = true
+            };
 
-            string serializedAccounts = JsonSerializer.Serialize(accounts, typeof(T), jsonOpts);
+            string serializedAccounts = JsonSerializer.Serialize(accounts, typeof(HashSet<T>), jsonOpts);
 
             File.WriteAllText(FLAT_FILE_PATH, serializedAccounts);
+
+            return this;
         }
 
-        public IEnumerable<T> GetAccounts<T>()
+        public HashSet<T> GetAccounts<T>()
         {
-            return JsonSerializer.Deserialize<IEnumerable<T>>(File.ReadAllText(FLAT_FILE_PATH));
+            return JsonSerializer.Deserialize<HashSet<T>>(File.ReadAllText(FLAT_FILE_PATH));
         }
 
     }
