@@ -1,0 +1,20 @@
+﻿@using DataAccessLayer
+@model UserAccount
+@inject IAccountService accountService
+
+@if (Model != null)
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Details">@Model.Email</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Log Out</a>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Log In</a>
+    </li>
+}
+

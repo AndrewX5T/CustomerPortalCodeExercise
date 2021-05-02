@@ -10,24 +10,12 @@ using System.Threading.Tasks;
 
 namespace CustomerPortalCodeExercise.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        public IActionResult Index([FromServices] IAccountService accountService)
         {
-            _logger = logger;
-        }
+            LoggedInUser(accountService, out _);
 
-        public IActionResult Index([FromServices] IHashingService service)
-        {
-            Console.WriteLine($"Testing hashing service: 'testpassword' to {service.Hash("testpassword")}");
-
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
             return View();
         }
 

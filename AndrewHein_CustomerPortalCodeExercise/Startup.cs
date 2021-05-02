@@ -27,6 +27,20 @@ namespace CustomerPortalCodeExercise
 
             services.AddRazorPages();
 
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromSeconds(2000);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
+            services.AddMvc()
+                .AddRazorOptions(options =>
+                {
+                    options.ViewLocationFormats.Add("/{0}.cshtml");
+                })
+                .SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Latest);
+
             services.AddScoped(typeof(IHashingService), typeof(HashingService));
 
             services.AddSingleton(typeof(IAccountStoringService), typeof(AccountStoringService));
@@ -50,6 +64,8 @@ namespace CustomerPortalCodeExercise
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseSession();
 
             app.UseEndpoints(endpoints =>
             {

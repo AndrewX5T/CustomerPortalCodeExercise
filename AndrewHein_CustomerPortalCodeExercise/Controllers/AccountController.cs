@@ -10,11 +10,16 @@ using System.Threading.Tasks;
 
 namespace CustomerPortalCodeExercise.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController : BaseController
     {
         // GET: AccountController/Login
-        public ActionResult Login()
+        public ActionResult Login([FromServices] IAccountService accountService)
         {
+            if(LoggedInUser(accountService, out _))
+            {
+                return RedirectToAction("Details");
+            }
+
             return View();
         }
 
@@ -27,27 +32,45 @@ namespace CustomerPortalCodeExercise.Controllers
             [FromServices] IHashingService hasher
             )
         {
-            //attempt to safely get the login details and pass them to the account service
-            //if the credentials are valid and the account exists, store the account identifier in session
-            //not a secure practice, of course.
+            //if already logged in, redirect to log out screen instead.
+            if(LoggedInUser(accountService, out _))
+            {
+                RedirectToAction("Logout");
+            }
 
+            //attempt to get the login details and pass them to the account service
+            //if the credentials are valid and the account exists, store the account identifier in session
+            //not a secure practice.
             if(loginAttempt.AttemptAccount(accountService, hasher, out UserAccount loginAccount))
             {
-                PerformLoginUser(loginAccount);
+                SetLoggedInUser(loginAccount);
             }
 
             return View();
         }
 
         // GET: AccountController/Details/5
-        public ActionResult Details()
+        public ActionResult Details([FromServices] IAccountService accountService)
         {
-            return View();
+            //Must be logged in to see account details
+            if (LoggedInUser(accountService, out UserAccount loginUser))
+            {
+                return View(loginUser);
+            }
+
+            //When not logged in, redirect to the login page
+            return RedirectToAction("Login");
         }
 
         // GET: AccountController/Create
-        public ActionResult Create()
+        public ActionResult Create([FromServices] IAccountService accountService)
         {
+            //Can't create account while logged in, redirect to account details
+            if(LoggedInUser(accountService, out _))
+            {
+                RedirectToAction("Details");
+            }
+
             //ViewData vars used to report validation issues
             ViewData["accountFailure"] = false;
             ViewData["failureReason"] = string.Empty;
@@ -65,6 +88,12 @@ namespace CustomerPortalCodeExercise.Controllers
             [FromServices] IHashingService hasher
             ) 
         {
+            //if already logged in, redirect to account details
+            if (LoggedInUser(accountService, out _))
+            {
+                RedirectToAction("Details");
+            }
+
             //create the account from the form data
             UserAccount user = userAccountAttempt.CreateUserAccount(hasher);
 
@@ -79,6 +108,7 @@ namespace CustomerPortalCodeExercise.Controllers
                 //prompt user that account creation failed
                 ViewData["accountFailure"] = true;
                 ViewData["failureReason"] = "Email already in use.";
+
                 return View();
             }
         }
@@ -123,32 +153,6 @@ namespace CustomerPortalCodeExercise.Controllers
             {
                 return View();
             }
-        }
-
-        private UserAccount PerformLoginUser(UserAccount account)
-        {
-            ISession session = ControllerContext.HttpContext.Session;
-
-            session.Set("userAuthToken", account.Identifier.ToByteArray());
-
-            return account;
-        }
-
-        private bool ReadLoginUser(IAccountService accountService, out UserAccount account)
-        {
-            ISession session = ControllerContext.HttpContext.Session;
-
-            byte[] userAuthToken = session.Get("userAuthToken");
-
-            if (userAuthToken != null)
-            {
-                Guid identifier = new Guid(userAuthToken);
-
-                return accountService.AccountExists(identifier, out account);
-            }
-
-            account = null;
-            return false;
         }
     }
 }
