@@ -1,4 +1,5 @@
 ﻿using DataAccessLayer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -12,9 +13,9 @@ namespace CustomerPortalCodeExercise.Views.Shared.Components.AccountNav
     {
         private UserAccount account = null;
 
-        public AccountNav(IAccountService accountService,)
+        public AccountNav(IAccountService accountService, IHttpContextAccessor context)
         {
-            if(HttpContext.Session.TryGetValue("userAuthToken", out byte[] userTokenBytes))
+            if(context.HttpContext.Session.TryGetValue("userAuthToken", out byte[] userTokenBytes))
             {
                 if (accountService.AccountExists(new Guid(userTokenBytes), out UserAccount matchAccount))
                 {

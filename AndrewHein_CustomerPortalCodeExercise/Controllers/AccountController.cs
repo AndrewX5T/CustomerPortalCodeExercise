@@ -1,7 +1,8 @@
-﻿using CustomerPortalCodeExercise.Models;
+﻿using CustomerPortalCodeExercise.Modelstate;
 using DataAccessLayer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
@@ -12,10 +13,19 @@ namespace CustomerPortalCodeExercise.Controllers
 {
     public class AccountController : BaseController
     {
+        public AccountController(
+            IAccountService accountService,
+            IAccountStoringService accountStore,
+            IHashingService hasher
+            ) : base(accountService, accountStore, hasher)
+        {}
+
         // GET: AccountController/Login
-        public ActionResult Login([FromServices] IAccountService accountService)
+        public ActionResult Login()
         {
-            if(LoggedInUser(accountService, out _))
+            ViewData["validationIssues"] = new List<string>();
+
+            if (LoggedInUser( out _))
             {
                 return RedirectToAction("Details");
             }
@@ -26,14 +36,11 @@ namespace CustomerPortalCodeExercise.Controllers
         // POST: AccountController/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Login(
-            [FromForm] LoginAttempt loginAttempt,
-            [FromServices] IAccountService accountService,
-            [FromServices] IHashingService hasher
-            )
+        public ActionResult Login([FromForm] LoginAttempt loginAttempt)
         {
+            ViewData["validationIssues"] = new List<string>();
             //if already logged in, redirect to log out screen instead.
-            if(LoggedInUser(accountService, out _))
+            if (LoggedInUser(out _))
             {
                 RedirectToAction("Logout");
             }
@@ -45,15 +52,22 @@ namespace CustomerPortalCodeExercise.Controllers
             {
                 SetLoggedInUser(loginAccount);
             }
+            else
+            {
+                ((List<string>)ViewData["validationIssues"]).Add("Incorrect email or password.");
+                return View();
+            }
 
-            return View();
+            return Redirect("/Home/Index");
         }
 
-        // GET: AccountController/Details/5
-        public ActionResult Details([FromServices] IAccountService accountService)
+        // POST: AccountController/Logout
+
+        // GET: AccountController/Details/
+        public ActionResult Details()
         {
             //Must be logged in to see account details
-            if (LoggedInUser(accountService, out UserAccount loginUser))
+            if (LoggedInUser(out UserAccount loginUser))
             {
                 return View(loginUser);
             }
@@ -63,17 +77,16 @@ namespace CustomerPortalCodeExercise.Controllers
         }
 
         // GET: AccountController/Create
-        public ActionResult Create([FromServices] IAccountService accountService)
+        public ActionResult Create()
         {
             //Can't create account while logged in, redirect to account details
-            if(LoggedInUser(accountService, out _))
+            if(LoggedInUser(out _))
             {
                 RedirectToAction("Details");
             }
 
             //ViewData vars used to report validation issues
-            ViewData["accountFailure"] = false;
-            ViewData["failureReason"] = string.Empty;
+            ViewData["validationIssues"] = new List<string>();
 
             return View();
         }
@@ -81,42 +94,60 @@ namespace CustomerPortalCodeExercise.Controllers
         // POST: AccountController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(
-            [FromForm] UserAccountBuilder userAccountAttempt,
-            [FromServices] IAccountService accountService,
-            [FromServices] IAccountStoringService accountStore,
-            [FromServices] IHashingService hasher
-            ) 
+        public ActionResult Create([FromForm] UserAccountBuilder userAccountAttempt) 
         {
+            ViewData["validationIssues"] = new List<string>();
+
             //if already logged in, redirect to account details
-            if (LoggedInUser(accountService, out _))
+            if (LoggedInUser(out _))
             {
                 RedirectToAction("Details");
             }
 
-            //create the account from the form data
-            UserAccount user = userAccountAttempt.CreateUserAccount(hasher);
-
-            //pass the account to the service to validate and add it
-            if (accountService.AddAccount(user, accountStore))
+            if (ModelState.IsValid)
             {
-                //direct user to login (new account created)
-                return RedirectToAction("Login");
-            }
-            else
-            {
-                //prompt user that account creation failed
-                ViewData["accountFailure"] = true;
-                ViewData["failureReason"] = "Email already in use.";
+                //create the account from the form data
+                UserAccount user = userAccountAttempt.CreateUserAccount(hasher);
 
-                return View();
+                bool accountCreated = accountService.AddAccount(user, accountStore);
+
+                //pass the account to the service to validate and add it
+                if (accountCreated)
+                {
+                    //direct user to login (new account created)
+                    return RedirectToAction("Login");
+                }
+                else //account was not created
+                {
+                    //prompt user that account creation failed
+                    ((List<string>)ViewData["validationIssues"]).Add("Email already in use.");
+                }
             }
+            else //model state is invalid
+            {
+                foreach(ModelStateEntry state in ModelState.Values)
+                {
+                    foreach(ModelError error in state.Errors)
+                    {
+                        ((List<string>)ViewData["validationIssues"]).Add(error.ErrorMessage);
+                    }
+                }
+            }
+
+            return View();
         }
 
         // GET: AccountController/Edit/5
-        public ActionResult Edit(int id)
+        public ActionResult Edit()
         {
-            return View();
+            if(LoggedInUser(out UserAccount account))
+            {
+                return View(account);
+            }
+            else
+            {
+                return RedirectToAction("Login");
+            }
         }
 
         // POST: AccountController/Edit/5

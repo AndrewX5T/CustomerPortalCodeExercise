@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CustomerPortalCodeExercise.Models
+namespace CustomerPortalCodeExercise.Modelstate
 {
     public class LoginAttempt
     {
@@ -17,19 +17,6 @@ namespace CustomerPortalCodeExercise.Models
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
-        /// <summary>
-        /// Create temporary account container to store the input credentials
-        /// </summary>
-        /// <param name="hasher"></param>
-        /// <returns>partially populated account: for validation only</returns>
-        UserAccount CreateLoginUser(IHashingService hasher)
-        {
-            return new UserAccount()
-            {
-                Email = this.Email,
-                PasswordHash = hasher.Hash(this.Password)
-            };
-        }
 
         /// <summary>
         /// Pass input credential account to account service
@@ -44,7 +31,7 @@ namespace CustomerPortalCodeExercise.Models
             out UserAccount account)
         {
             return accountService
-                .LoginAttemptValid(CreateLoginUser(hasher), out account);
+                .LoginAttemptValid(Email, hasher.Hash(Password), out account);
         }
     }
 }

@@ -4,30 +4,27 @@
 }
 
 <form class="row" asp-controller="Account" asp-action="Create" method="post">
-    @if ((bool)ViewData["accountFailure"])
-    {
-        <p class="col-12">@ViewData["failureReason"]</p>
+
+    <label class="col-md-3 col-12" asp-for="FirstName">First Name</label>
+    <input class="col-md-9 col-12" asp-for="FirstName" />
+
+    <label class="col-md-3 col-12" asp-for="LastName">Last Name</label>
+    <input class="col-md-9 col-12" asp-for="LastName" />
+
+    <label class="col-md-3 col-12" asp-for="Email">Email Address</label>
+    <input class="col-md-9 col-12" asp-for="Email" />
+
+    <label class="col-md-3 col-12" asp-for="Password">Password</label>
+    <input class="col-md-9 col-12" asp-for="Password" />
+
+    <label class="col-md-3 col-12" asp-for="VerifyPassword">Verify Password</label>
+    <input class="col-md-9 col-12" asp-for="VerifyPassword" />
+
+    @foreach (string err in (List<string>)ViewData["validationIssues"])
+    { 
+        <p class="col-12">@err</p> 
     }
 
-    <label class="col-md-3 col-12" asp-for="firstName">First Name</label>
-    <input class="col-md-9 col-12" asp-for="firstName" />
-
-    <label class="col-md-3 col-12" asp-for="lastName">Last Name</label>
-    <input class="col-md-9 col-12" asp-for="lastName" />
-
-    <label class="col-md-3 col-12" asp-for="email">Email Address</label>
-    <input class="col-md-9 col-12" asp-for="email" />
-
-    <label class="col-md-3 col-12" asp-for="password">Password</label>
-    <input class="col-md-9 col-12" asp-for="password" />
-
-    <label class="col-md-3 col-12" asp-for="verifyPassword">Verify Password</label>
-    <input class="col-md-9 col-12" asp-for="verifyPassword" />
-
-    @if ((bool)ViewData["accountFailure"])
-    {
-        <p class="col-12">@ViewData["failureReason"]</p>
-    }
 
     <input class="col-md-8 col-12" type="submit" />
 </form>

@@ -1,4 +1,4 @@
-﻿using CustomerPortalCodeExercise.Models;
+﻿using CustomerPortalCodeExercise.Modelstate;
 using DataAccessLayer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -12,9 +12,17 @@ namespace CustomerPortalCodeExercise.Controllers
 {
     public class HomeController : BaseController
     {
-        public IActionResult Index([FromServices] IAccountService accountService)
+        public HomeController(
+            IAccountService accountService,
+            IAccountStoringService accountStore,
+            IHashingService hasher
+            ) : base(accountService, accountStore, hasher)
+        {}
+
+
+        public IActionResult Index()
         {
-            LoggedInUser(accountService, out _);
+            LoggedInUser(out _);
 
             return View();
         }

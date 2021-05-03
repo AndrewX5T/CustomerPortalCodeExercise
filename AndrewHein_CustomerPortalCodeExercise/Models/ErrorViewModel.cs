@@ -1,6 +1,6 @@
 using System;
 
-namespace CustomerPortalCodeExercise.Models
+namespace CustomerPortalCodeExercise.Modelstate
 {
     public class ErrorViewModel
     {

@@ -13,9 +13,9 @@ namespace DataAccessLayer
         public IAccountService StoreAccounts(IAccountStoringService accountStore);
         public bool AddAccount(UserAccount account, IAccountStoringService accountStore);
         public IAccountService UpdateAccount(UserAccount updatedAccount, UserAccount storedAccount);
-        public bool AccountExists(UserAccount account, out UserAccount matchAccount);
+        public bool AccountExists(string emailAddress, out UserAccount matchAccount);
         public bool AccountExists(Guid identifer, out UserAccount matchAccount);
-        public bool LoginAttemptValid(UserAccount account, out UserAccount loginAccount);
+        public bool LoginAttemptValid(string emailAddress, string passwordHash, out UserAccount loginAccount);
     }
 
 
@@ -66,7 +66,7 @@ namespace DataAccessLayer
         /// <returns>boolean: was the account successfully added</returns>
         public bool AddAccount(UserAccount account, IAccountStoringService accountStore)
         {
-            if(!AccountExists(account, out _))
+            if(!AccountExists(account.Email, out _))
             {
                 Accounts.Add(account);
 
@@ -123,7 +123,7 @@ namespace DataAccessLayer
         /// <returns>boolean: update was performed</returns>
         bool UpdateEmail(UserAccount updatedAccount, UserAccount storedAccount)
         {
-            if (!AccountExists(updatedAccount, out _)) //this will test for an account with same email
+            if (!AccountExists(updatedAccount.Identifier, out _)) //this will test for an account with same email
             {
                 //Safe to proceed updating to the provided email
                 storedAccount.Email = updatedAccount.Email;
@@ -154,10 +154,10 @@ namespace DataAccessLayer
         /// </summary>
         /// <param name="account"></param>
         /// <returns>boolean: Account.Email Exists in Accounts</returns>
-        public bool AccountExists(UserAccount account, out UserAccount matchAccount)
+        public bool AccountExists(string emailAddress, out UserAccount matchAccount)
         {
             matchAccount = Accounts
-                .Where(x => x.Email.Equals(account.Email))
+                .Where(x => x.Email.Equals(emailAddress))
                 .FirstOrDefault();
 
             return matchAccount != null;
@@ -184,11 +184,11 @@ namespace DataAccessLayer
         /// <param name="account"></param>
         /// <param name="hasher"></param>
         /// <returns>boolean: Log in criteria met</returns>
-        public bool LoginAttemptValid(UserAccount account, out UserAccount loginAccount)
+        public bool LoginAttemptValid(string emailAddress, string passwordHash, out UserAccount loginAccount)
         {
-            if (AccountExists(account, out loginAccount))
+            if (AccountExists(emailAddress, out loginAccount))
             {
-                string inputHash = account.PasswordHash;
+                string inputHash = passwordHash;
                 string storedHash = loginAccount.PasswordHash;
 
                 return storedHash.Equals(inputHash);

@@ -1,6 +1,7 @@
 using DataAccessLayer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -46,6 +47,8 @@ namespace CustomerPortalCodeExercise
             services.AddSingleton(typeof(IAccountStoringService), typeof(AccountStoringService));
 
             services.AddSingleton(typeof(IAccountService), typeof(AccountService));
+
+            services.AddSingleton(typeof(IHttpContextAccessor), typeof(HttpContextAccessor));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -62,8 +65,6 @@ namespace CustomerPortalCodeExercise
             app.UseStaticFiles();
 
             app.UseRouting();
-
-            app.UseAuthorization();
 
             app.UseSession();
 

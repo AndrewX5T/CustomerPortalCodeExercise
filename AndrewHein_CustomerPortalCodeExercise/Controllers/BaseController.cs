@@ -10,6 +10,20 @@ namespace CustomerPortalCodeExercise.Controllers
 {
     public class BaseController : Controller
     {
+        protected readonly IAccountService accountService;
+        protected readonly IAccountStoringService accountStore;
+        protected readonly IHashingService hasher;
+
+        public BaseController(
+            IAccountService accountService,
+            IAccountStoringService accountStore,
+            IHashingService hashingService)
+        {
+            this.accountService = accountService;
+            this.accountStore = accountStore;
+            this.hasher = hashingService;
+        }
+
         protected UserAccount SetLoggedInUser(UserAccount account)
         {
             ISession session = ControllerContext.HttpContext.Session;
@@ -26,7 +40,7 @@ namespace CustomerPortalCodeExercise.Controllers
             session.Remove("userAuthToken");
         }
 
-        protected bool LoggedInUser(IAccountService accountService, out UserAccount account)
+        protected bool LoggedInUser(out UserAccount account)
         {
             ISession session = ControllerContext.HttpContext.Session;
 
