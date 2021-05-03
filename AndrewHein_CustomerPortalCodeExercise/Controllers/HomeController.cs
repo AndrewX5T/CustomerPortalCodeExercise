@@ -14,9 +14,8 @@ namespace CustomerPortalCodeExercise.Controllers
     {
         public HomeController(
             IAccountService accountService,
-            IAccountStoringService accountStore,
             IHashingService hasher
-            ) : base(accountService, accountStore, hasher)
+            ) : base(accountService, hasher)
         {}
 
 

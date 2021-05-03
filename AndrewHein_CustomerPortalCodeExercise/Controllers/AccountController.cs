@@ -13,12 +13,16 @@ namespace CustomerPortalCodeExercise.Controllers
 {
     public class AccountController : BaseController
     {
+        protected readonly IChangeService changeService;
+
         public AccountController(
             IAccountService accountService,
-            IAccountStoringService accountStore,
-            IHashingService hasher
-            ) : base(accountService, accountStore, hasher)
-        {}
+            IHashingService hasher,
+            IChangeService changeService
+            ) : base(accountService, hasher)
+        {
+            this.changeService = changeService;
+        }
 
         // GET: AccountController/Login
         public ActionResult Login()
@@ -108,7 +112,7 @@ namespace CustomerPortalCodeExercise.Controllers
                 //create the account from the form data
                 UserAccount user = userAccountAttempt.CreateUserAccount(hasher);
 
-                bool accountCreated = accountService.AddAccount(user, accountStore);
+                bool accountCreated = accountService.AddAccount(user);
 
                 //pass the account to the service to validate and add it
                 if (accountCreated)
@@ -150,17 +154,23 @@ namespace CustomerPortalCodeExercise.Controllers
                     || !string.IsNullOrEmpty(updatedFields.LastName))
                 {
                     accountService.UpdateAccountName(
-                        updatedFields.FirstName, updatedFields.LastName, account);
+                        updatedFields.FirstName,
+                        updatedFields.LastName,
+                        account);
                 }
                 //Email form:
                 else if (!string.IsNullOrEmpty(updatedFields.Email))
                 {
-                    accountService.UpdateAccountEmail(updatedFields.Email, account);
+                    accountService.UpdateAccountEmail(
+                        updatedFields.Email,
+                        account);
                 }
                 //Password form
                 else if (!string.IsNullOrEmpty(updatedFields.PasswordHash))
                 {
-                    accountService.UpdateAccountPassword(updatedFields.PasswordHash, account);
+                    accountService.UpdateAccountPassword(
+                        updatedFields.PasswordHash,
+                        account);
                 }
 
                 return RedirectToAction("Details");
@@ -168,27 +178,6 @@ namespace CustomerPortalCodeExercise.Controllers
             else
             { 
                 return RedirectToAction("Login");
-            }
-        }
-
-        // GET: AccountController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: AccountController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
             }
         }
     }

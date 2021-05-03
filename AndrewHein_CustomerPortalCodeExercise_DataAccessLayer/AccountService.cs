@@ -8,15 +8,78 @@ namespace DataAccessLayer
 {
     public interface IAccountService
     {
-        public HashSet<UserAccount> Accounts { get; set; }
-        public IAccountService LoadAccounts(IAccountStoringService accountStore);
-        public IAccountService StoreAccounts(IAccountStoringService accountStore);
-        public bool AddAccount(UserAccount account, IAccountStoringService accountStore);
+        /// <summary>
+        /// Uses accountStore to read account data from .json into memory
+        /// </summary>
+        /// <param name="accountStore"></param>
+        /// <returns>Hashset of UserAccounts</returns>
+        public IAccountService LoadAccounts();
+
+        /// <summary>
+        /// Uses accountStore to serialize account data into .json format and store
+        /// </summary>
+        /// <param name="accountStore"></param>
+        /// <returns>Service</returns>
+        public IAccountService StoreAccounts();
+
+        /// <summary>
+        /// Check that an account with provided email does not exist, if not, add the account and store
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns>boolean: was the account successfully added</returns>
+        public bool AddAccount(UserAccount account);
+
+        /// <summary>
+        /// Compare name inputs to stored names, if they are valid and not identical, update stored
+        /// </summary>
+        /// <param name="firstName"></param>
+        /// <param name="lastName"></param>
+        /// <param name="storedAccount"></param>
+        /// <param name="accountStore"></param>
+        /// <returns>Service</returns>
         public IAccountService UpdateAccountName(string firstName, string lastName, UserAccount storedAccount);
+
+        /// <summary>
+        /// Compare email to stored email, if valid and not already in use, update
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="storedAccount"></param>
+        /// <param name="accountStore"></param>
+        /// <returns>Service</returns>
         public IAccountService UpdateAccountEmail(string email, UserAccount storedAccount);
+
+        /// <summary>
+        /// Compare password to stored password, if valid and not identical, update
+        /// </summary>
+        /// <param name="passwordHash"></param>
+        /// <param name="storedAccount"></param>
+        /// <param name="accountStore"></param>
+        /// <returns>Service</returns>
         public IAccountService UpdateAccountPassword(string passwordHash,UserAccount storedAccount);
+
+        /// <summary>
+        /// Email field must be unique. Check if the provided email matches any in the Accounts collection.
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns>boolean: Account.Email Exists in Accounts</returns>
         public bool AccountExists(string emailAddress, out UserAccount matchAccount);
+
+        /// <summary>
+        /// Identifier must be unique. Once an account is created, its identifier should not be modified,
+        /// and can be used to lookup the exact account from the service.
+        /// </summary>
+        /// <param name="identifer"></param>
+        /// <param name="matchAccount"></param>
+        /// <returns>boolean: Account.Email Exists in Accounts</returns>
         public bool AccountExists(Guid identifer, out UserAccount matchAccount);
+
+        /// <summary>
+        /// Check that the account exists and that the password hash matches the provided
+        /// </summary>
+        /// <param name="emailAddress"></param>
+        /// <param name="passwordHash"></param>
+        /// <param name="loginAccount"></param>
+        /// <returns>boolean: Log in criteria met</returns>
         public bool LoginAttemptValid(string emailAddress, string passwordHash, out UserAccount loginAccount);
     }
 
@@ -28,18 +91,13 @@ namespace DataAccessLayer
             return new AccountService();
         }
 
-        public HashSet<UserAccount> Accounts { get; set; }
+        protected HashSet<UserAccount> Accounts { get; set; }
 
-        /// <summary>
-        /// Uses accountStore to read account data from .json into memory
-        /// </summary>
-        /// <param name="accountStore"></param>
-        /// <returns></returns>
-        public IAccountService LoadAccounts(IAccountStoringService accountStore)
+        public IAccountService LoadAccounts()
         {
             try
             {
-                Accounts = accountStore.GetAccounts<UserAccount>();
+                Accounts = AccountStore.GetAccounts();
             }
             catch(Exception) // for expediency, handle any exception by initializing a new hashset
             {
@@ -49,42 +107,26 @@ namespace DataAccessLayer
             return this;
         }
 
-        /// <summary>
-        /// Uses accountStore to serialize account data into .json format and store
-        /// </summary>
-        /// <param name="accountStore"></param>
-        /// <returns></returns>
-        public IAccountService StoreAccounts(IAccountStoringService accountStore)
+        public IAccountService StoreAccounts()
         {
-            accountStore.StoreAccounts<UserAccount>(Accounts);
+            AccountStore.Store(Accounts);
 
             return this;
         }
 
-        /// <summary>
-        /// Check that an account with provided email does not exist, if not, add the account and store
-        /// </summary>
-        /// <param name="account"></param>
-        /// <returns>boolean: was the account successfully added</returns>
-        public bool AddAccount(UserAccount account, IAccountStoringService accountStore)
+        public bool AddAccount(UserAccount account)
         {
             if(!AccountExists(account.Email, out _))
             {
                 Accounts.Add(account);
 
-                StoreAccounts(accountStore);
+                StoreAccounts();
 
                 return true;
             }
             return false;
         }
 
-        /// <summary>
-        /// Compare name inputs to stored names, if they are valid and not identical, update stored
-        /// </summary>
-        /// <param name="updatedAccount"></param>
-        /// <param name="storedAccount"></param>
-        /// <returns></returns>
         public IAccountService UpdateAccountName(
             string firstName, string lastName, UserAccount storedAccount)
         {
@@ -100,15 +142,11 @@ namespace DataAccessLayer
                 storedAccount.LastName = lastName;
             }
 
+            StoreAccounts();
+
             return this;
         }
 
-        /// <summary>
-        /// Compare email to stored email, if valid and not already in use, update
-        /// </summary>
-        /// <param name="updatedAccount"></param>
-        /// <param name="storedAccount"></param>
-        /// <returns></returns>
         public IAccountService UpdateAccountEmail(
             string email, UserAccount storedAccount)
         {
@@ -119,15 +157,11 @@ namespace DataAccessLayer
                 storedAccount.Email = email;
             }
 
+            StoreAccounts();
+
             return this;
         }
 
-        /// <summary>
-        /// Compare password to stored password, if valid and not identical, update
-        /// </summary>
-        /// <param name="updatedAccount"></param>
-        /// <param name="storedAccount"></param>
-        /// <returns></returns>
         public IAccountService UpdateAccountPassword(
             string passwordHash, UserAccount storedAccount)
         {
@@ -137,14 +171,11 @@ namespace DataAccessLayer
                 storedAccount.PasswordHash = passwordHash;
             }
 
+            StoreAccounts();
+
             return this;
         }
 
-        /// <summary>
-        /// Email field must be unique. Check if the provided email matches any in the Accounts collection.
-        /// </summary>
-        /// <param name="account"></param>
-        /// <returns>boolean: Account.Email Exists in Accounts</returns>
         public bool AccountExists(string emailAddress, out UserAccount matchAccount)
         {
             matchAccount = Accounts
@@ -154,12 +185,6 @@ namespace DataAccessLayer
             return matchAccount != null;
         }
 
-        /// <summary>
-        /// Identifier must be unique. Once an account is created, its identifier should not be modified,
-        /// and can be used to lookup the exact account from the service.
-        /// </summary>
-        /// <param name="account"></param>
-        /// <returns>boolean: Account.Email Exists in Accounts</returns>
         public bool AccountExists(Guid identifier, out UserAccount matchAccount)
         {
             matchAccount = Accounts
@@ -169,12 +194,6 @@ namespace DataAccessLayer
             return matchAccount != null;
         }
 
-        /// <summary>
-        /// Check that the account exists and that the password hash matches the provided
-        /// </summary>
-        /// <param name="account"></param>
-        /// <param name="hasher"></param>
-        /// <returns>boolean: Log in criteria met</returns>
         public bool LoginAttemptValid(string emailAddress, string passwordHash, out UserAccount loginAccount)
         {
             if (AccountExists(emailAddress, out loginAccount))

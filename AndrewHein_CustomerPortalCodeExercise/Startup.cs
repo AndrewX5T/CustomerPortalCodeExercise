@@ -42,17 +42,20 @@ namespace CustomerPortalCodeExercise
                 })
                 .SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Latest);
 
-            services.AddScoped(typeof(IHashingService), typeof(HashingService));
+            services.AddSingleton(typeof(IHttpContextAccessor), typeof(HttpContextAccessor));
 
-            services.AddSingleton(typeof(IAccountStoringService), typeof(AccountStoringService));
+            //Password Hashing 
+            services.AddSingleton(typeof(IHashingService), typeof(HashingService));
 
+            //Account Backend
             services.AddSingleton(typeof(IAccountService), typeof(AccountService));
 
-            services.AddSingleton(typeof(IHttpContextAccessor), typeof(HttpContextAccessor));
+            //Change Backend
+            services.AddSingleton(typeof(IChangeService), typeof(ChangeService));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHashingService hasher, IAccountStoringService accountStore)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -76,14 +79,15 @@ namespace CustomerPortalCodeExercise
                 endpoints.MapRazorPages();
             });
 
-            IAccountStoringService store = app
-                .ApplicationServices
-                .GetRequiredService<IAccountStoringService>();
-
-            //Initialize the account service, try to read the Account.json file if it exists
+            //Initialize the account service, read the Account.json file if it exists
             app.ApplicationServices
                 .GetRequiredService<IAccountService>()
-                .LoadAccounts(store);
+                .LoadAccounts();
+
+            //Initialize the change service, read the ChangeHistory.json file if it exists
+            app.ApplicationServices
+                .GetRequiredService<IChangeService>()
+                .LoadChanges();
         }
     }
 }

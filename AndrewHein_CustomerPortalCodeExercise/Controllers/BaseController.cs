@@ -11,16 +11,13 @@ namespace CustomerPortalCodeExercise.Controllers
     public class BaseController : Controller
     {
         protected readonly IAccountService accountService;
-        protected readonly IAccountStoringService accountStore;
         protected readonly IHashingService hasher;
 
         public BaseController(
             IAccountService accountService,
-            IAccountStoringService accountStore,
             IHashingService hashingService)
         {
             this.accountService = accountService;
-            this.accountStore = accountStore;
             this.hasher = hashingService;
         }
 
