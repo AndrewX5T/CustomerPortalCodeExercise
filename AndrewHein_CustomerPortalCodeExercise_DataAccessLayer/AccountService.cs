@@ -11,14 +11,12 @@ namespace DataAccessLayer
         /// <summary>
         /// Uses accountStore to read account data from .json into memory
         /// </summary>
-        /// <param name="accountStore"></param>
         /// <returns>Hashset of UserAccounts</returns>
         public IAccountService LoadAccounts();
 
         /// <summary>
         /// Uses accountStore to serialize account data into .json format and store
         /// </summary>
-        /// <param name="accountStore"></param>
         /// <returns>Service</returns>
         public IAccountService StoreAccounts();
 
@@ -33,34 +31,39 @@ namespace DataAccessLayer
         /// Compare name inputs to stored names, if they are valid and not identical, update stored
         /// </summary>
         /// <param name="firstName"></param>
+        /// <param name="storedAccount"></param>
+        /// <returns>Service</returns>
+        public IAccountService UpdateAccountFirstName(string firstName, UserAccount storedAccount, IChangeService changeService);
+
+        /// <summary>
+        /// Compare name inputs to stored names, if they are valid and not identical, update stored
+        /// </summary>
         /// <param name="lastName"></param>
         /// <param name="storedAccount"></param>
-        /// <param name="accountStore"></param>
         /// <returns>Service</returns>
-        public IAccountService UpdateAccountName(string firstName, string lastName, UserAccount storedAccount);
+        public IAccountService UpdateAccountLastName(string lastName, UserAccount storedAccount, IChangeService changeService);
 
         /// <summary>
         /// Compare email to stored email, if valid and not already in use, update
         /// </summary>
         /// <param name="email"></param>
         /// <param name="storedAccount"></param>
-        /// <param name="accountStore"></param>
         /// <returns>Service</returns>
-        public IAccountService UpdateAccountEmail(string email, UserAccount storedAccount);
+        public IAccountService UpdateAccountEmail(string email, UserAccount storedAccount, IChangeService changeService);
 
         /// <summary>
         /// Compare password to stored password, if valid and not identical, update
         /// </summary>
         /// <param name="passwordHash"></param>
         /// <param name="storedAccount"></param>
-        /// <param name="accountStore"></param>
         /// <returns>Service</returns>
-        public IAccountService UpdateAccountPassword(string passwordHash,UserAccount storedAccount);
+        public IAccountService UpdateAccountPassword(string passwordHash,UserAccount storedAccount, IChangeService changeService);
 
         /// <summary>
         /// Email field must be unique. Check if the provided email matches any in the Accounts collection.
         /// </summary>
-        /// <param name="account"></param>
+        /// <param name="emailAddress"></param>
+        /// <param name="matchAccount"></param>
         /// <returns>boolean: Account.Email Exists in Accounts</returns>
         public bool AccountExists(string emailAddress, out UserAccount matchAccount);
 
@@ -97,7 +100,7 @@ namespace DataAccessLayer
         {
             try
             {
-                Accounts = AccountStore.GetAccounts();
+                Accounts = AccountStore.GetValues<UserAccount>(AccountStore.FLAT_FILE_PATH).ToHashSet();
             }
             catch(Exception) // for expediency, handle any exception by initializing a new hashset
             {
@@ -109,7 +112,7 @@ namespace DataAccessLayer
 
         public IAccountService StoreAccounts()
         {
-            AccountStore.Store(Accounts);
+            AccountStore.Store(Accounts, AccountStore.FLAT_FILE_PATH);
 
             return this;
         }
@@ -127,51 +130,69 @@ namespace DataAccessLayer
             return false;
         }
 
-        public IAccountService UpdateAccountName(
-            string firstName, string lastName, UserAccount storedAccount)
+        public IAccountService UpdateAccountFirstName(string firstName, UserAccount storedAccount, IChangeService changeService)
         {
             if (!string.IsNullOrEmpty(firstName) //firstName not blank
                 && !storedAccount.FirstName.Equals(firstName)) //firstname not = to stored
             {
+                changeService.AddChange(storedAccount, "FirstName", storedAccount.FirstName, firstName);
+
                 storedAccount.FirstName = firstName;
+
+                StoreAccounts();
             }
 
+            
+
+            return this;
+        }
+
+        public IAccountService UpdateAccountLastName(string lastName, UserAccount storedAccount, IChangeService changeService)
+        {
             if (!string.IsNullOrEmpty(lastName) //lastName not blank
                 && !storedAccount.FirstName.Equals(lastName)) //lastName not = to stored
             {
+                changeService.AddChange(storedAccount, "LastName", storedAccount.LastName, lastName);
+
                 storedAccount.LastName = lastName;
+
+                StoreAccounts();
             }
 
-            StoreAccounts();
+            
 
             return this;
         }
 
         public IAccountService UpdateAccountEmail(
-            string email, UserAccount storedAccount)
+            string email, UserAccount storedAccount, IChangeService changeService)
         {
             if (!string.IsNullOrEmpty(email) //email not blank
                 && !storedAccount.Email.Equals(email) //email not = to stored
                 && !AccountExists(email, out _)) //email not already in use
             {
-                storedAccount.Email = email;
-            }
+                changeService.AddChange(storedAccount, "Email", storedAccount.Email, email);
 
-            StoreAccounts();
+                storedAccount.Email = email;
+
+                StoreAccounts();
+            }
 
             return this;
         }
 
         public IAccountService UpdateAccountPassword(
-            string passwordHash, UserAccount storedAccount)
+            string passwordHash, UserAccount storedAccount, IChangeService changeService)
         {
             if (!string.IsNullOrEmpty(passwordHash) //password not blank
                 && !storedAccount.PasswordHash.Equals(passwordHash)) //password not = to stored
             {
-                storedAccount.PasswordHash = passwordHash;
-            }
+                changeService.AddChange(storedAccount, "PasswordHash", storedAccount.PasswordHash, passwordHash);
 
-            StoreAccounts();
+                storedAccount.PasswordHash = passwordHash;
+
+                StoreAccounts();
+            }
 
             return this;
         }

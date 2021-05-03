@@ -6,27 +6,9 @@ using System.Text.Json;
 
 namespace DataAccessLayer
 {
-    public abstract class AccountStore
+    public abstract class AccountStore : DataStore
     {
         //Path to the accounts file
-        const string FLAT_FILE_PATH = @"./Store/Accounts.json";
-
-        public static void Store(HashSet<UserAccount> accounts)
-        {
-            JsonSerializerOptions jsonOpts = new JsonSerializerOptions()
-            {
-                WriteIndented = true
-            };
-
-            string serializedAccounts = JsonSerializer.Serialize(accounts, typeof(HashSet<UserAccount>), jsonOpts);
-
-            File.WriteAllText(FLAT_FILE_PATH, serializedAccounts);
-        }
- 
-        public static HashSet<UserAccount> GetAccounts()
-        {
-            return JsonSerializer.Deserialize<HashSet<UserAccount>>(File.ReadAllText(FLAT_FILE_PATH));
-        }
-
+        public const string FLAT_FILE_PATH = @"./Store/Accounts.json";
     }
 }

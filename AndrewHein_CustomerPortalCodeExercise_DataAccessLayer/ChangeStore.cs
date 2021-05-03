@@ -6,26 +6,9 @@ using System.Text.Json;
 
 namespace DataAccessLayer
 {
-    public abstract class ChangeStore
+    public abstract class ChangeStore : DataStore
     {
-        private const string FLAT_FILE_PATH = @"./Store/ChangeHistory.json";
-
-        public static void Store(Dictionary<Guid, HashSet<AccountChange>> changes)
-        {
-            JsonSerializerOptions jsonOpts = new JsonSerializerOptions()
-            {
-                WriteIndented = true
-            };
-
-            string serializedAccounts = JsonSerializer.Serialize(
-                changes, typeof(Dictionary<Guid,HashSet<AccountChange>>), jsonOpts);
-
-            File.WriteAllText(FLAT_FILE_PATH, serializedAccounts);
-        }
-
-        public static Dictionary<Guid, HashSet<AccountChange>> GetChanges()
-        {
-            return JsonSerializer.Deserialize<Dictionary<Guid, HashSet<AccountChange>>>(File.ReadAllText(FLAT_FILE_PATH));
-        }
+        //Path to the change history file
+        public const string FLAT_FILE_PATH = @"./Store/ChangeHistory.json";
     }
 }

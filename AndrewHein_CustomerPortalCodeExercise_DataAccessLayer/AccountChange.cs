@@ -6,6 +6,8 @@ namespace DataAccessLayer
 {
     public class AccountChange
     {
+        public AccountChange()
+        {}
         public AccountChange(
             Guid accountIdentifier,
             string field,
@@ -15,14 +17,14 @@ namespace DataAccessLayer
             )
         {
             this.Identifier = accountIdentifier.ToString();
-            this.Field = field;
+            this.Type = field;
             this.PreviousValue = previous;
             this.UpdatedValue = updated;
             this.Timestamp = timestamp;
         }
 
         public string Identifier { get; set; }
-        public string Field { get; set; }
+        public string Type { get; set; }
         public string PreviousValue { get; set; }
         public string UpdatedValue { get; set; }
         public DateTime Timestamp { get; set; }

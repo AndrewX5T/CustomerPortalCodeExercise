@@ -34,7 +34,7 @@ namespace CustomerPortalCodeExercise.Modelstate
 
         [Display(Name = "Email Address"), DataType(DataType.EmailAddress), Required]
         [EmailAddress(ErrorMessage = "Please use a correctly formatted email address")]
-        [EmailValidationAttribute]
+        [EmailValidation]
         public string Email { get; set; }
 
 

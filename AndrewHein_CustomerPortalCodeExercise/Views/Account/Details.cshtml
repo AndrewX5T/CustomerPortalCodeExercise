@@ -1,4 +1,5 @@
-﻿@model DataAccessLayer.UserAccount
+﻿@using DataAccessLayer 
+@model DataAccessLayer.UserAccount
 
 @{
     ViewData["Title"] = $"Account Details";
@@ -33,4 +34,27 @@
 <div class="row">
     <div class="col-12"><a asp-controller="Account" asp-action="Edit">Edit Account</a></div>
     <div class="col-12"><a asp-controller="Account" asp-action="Logout">Log Out</a></div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h4>Account Change History</h4>
+        <table class="table table-bordered">
+            <tr>
+                <th>Changed</th>
+                <th>From</th>
+                <th>To</th>
+                <th>When</th>
+            </tr>
+            @foreach (AccountChange change in (HashSet<AccountChange>)ViewData["changes"])
+            {
+                <tr>
+                    <td>@change.Type</td>
+                    <td>@change.PreviousValue</td>
+                    <td>@change.UpdatedValue</td>
+                    <td>@change.Timestamp</td>
+                </tr>
+            }
+        </table>
+    </div>
 </div>

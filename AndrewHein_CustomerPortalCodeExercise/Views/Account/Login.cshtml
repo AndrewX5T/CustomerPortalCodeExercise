@@ -1,7 +1,7 @@
 ﻿@model LoginAttempt
 @{
     ViewData["Title"] = "Log In";
-    bool incorrectLogin = ViewData.Keys.Contains("incorrectLogin");
+    bool showInfo = ViewData.Keys.Contains("info");
 }
 <div class="row">
     <div class="col-md-4">
@@ -20,9 +20,9 @@
                 <input asp-for="Password" class="form-control" />
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
-            @if (incorrectLogin)
+            @if (showInfo)
             {
-                <span class="text-danger">Incorrect Email or Password.</span>
+                <span class="@ViewData["textClass"]">@ViewData["info"]</span>
             }
         <div class="btn-group d-flex justify-content-between">
             <input class="btn btn-primary" type="submit" value="Log In"/>
