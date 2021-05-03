@@ -3,28 +3,55 @@
     ViewData["Title"] = "Create Account";
 }
 
-<form class="row" asp-controller="Account" asp-action="Create" method="post">
+<div class="row">
+    <div class="col-md-4">
+        <form asp-controller="Account" asp-action="Create" method="post">
 
-    <label class="col-md-3 col-12" asp-for="FirstName">First Name</label>
-    <input class="col-md-9 col-12" asp-for="FirstName" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-    <label class="col-md-3 col-12" asp-for="LastName">Last Name</label>
-    <input class="col-md-9 col-12" asp-for="LastName" />
+            <div class="form-group">
+                <label asp-for="FirstName" class="control-label"></label>
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
 
-    <label class="col-md-3 col-12" asp-for="Email">Email Address</label>
-    <input class="col-md-9 col-12" asp-for="Email" />
+            <div class="form-group">
+                <label asp-for="LastName" class="control-label"></label>
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
 
-    <label class="col-md-3 col-12" asp-for="Password">Password</label>
-    <input class="col-md-9 col-12" asp-for="Password" />
+            <div class="form-group">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
 
-    <label class="col-md-3 col-12" asp-for="VerifyPassword">Verify Password</label>
-    <input class="col-md-9 col-12" asp-for="VerifyPassword" />
+            <div class="form-group">
+                <label asp-for="Password" class="control-label"></label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
 
-    @foreach (string err in (List<string>)ViewData["validationIssues"])
-    { 
-        <p class="col-12">@err</p> 
-    }
+            <div class="form-group">
+                <label asp-for="VerifyPassword" class="control-label"></label>
+                <input asp-for="VerifyPassword" class="form-control" />
+                <span asp-validation-for="VerifyPassword" class="text-danger"></span>
+            </div>
+
+            <div class="btn-group d-flex justify-content-between">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
 
 
-    <input class="col-md-8 col-12" type="submit" />
-</form>
+
+<div>
+    <a asp-controller="Account" asp-action="Login">Back</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

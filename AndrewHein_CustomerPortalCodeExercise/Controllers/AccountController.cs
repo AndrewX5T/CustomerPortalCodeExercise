@@ -23,8 +23,6 @@ namespace CustomerPortalCodeExercise.Controllers
         // GET: AccountController/Login
         public ActionResult Login()
         {
-            ViewData["validationIssues"] = new List<string>();
-
             if (LoggedInUser( out _))
             {
                 return RedirectToAction("Details");
@@ -38,7 +36,6 @@ namespace CustomerPortalCodeExercise.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Login([FromForm] LoginAttempt loginAttempt)
         {
-            ViewData["validationIssues"] = new List<string>();
             //if already logged in, redirect to log out screen instead.
             if (LoggedInUser(out _))
             {
@@ -54,7 +51,7 @@ namespace CustomerPortalCodeExercise.Controllers
             }
             else
             {
-                ((List<string>)ViewData["validationIssues"]).Add("Incorrect email or password.");
+                ViewData["incorrectLogin"] = true;
                 return View();
             }
 
@@ -62,6 +59,13 @@ namespace CustomerPortalCodeExercise.Controllers
         }
 
         // POST: AccountController/Logout
+        public ActionResult Logout()
+        {
+            if(LoggedInUser(out _)){
+                RemoveLoggedInUser();
+            }
+            return Redirect("/");
+        }
 
         // GET: AccountController/Details/
         public ActionResult Details()
@@ -85,9 +89,6 @@ namespace CustomerPortalCodeExercise.Controllers
                 RedirectToAction("Details");
             }
 
-            //ViewData vars used to report validation issues
-            ViewData["validationIssues"] = new List<string>();
-
             return View();
         }
 
@@ -96,8 +97,6 @@ namespace CustomerPortalCodeExercise.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([FromForm] UserAccountBuilder userAccountAttempt) 
         {
-            ViewData["validationIssues"] = new List<string>();
-
             //if already logged in, redirect to account details
             if (LoggedInUser(out _))
             {
@@ -117,21 +116,6 @@ namespace CustomerPortalCodeExercise.Controllers
                     //direct user to login (new account created)
                     return RedirectToAction("Login");
                 }
-                else //account was not created
-                {
-                    //prompt user that account creation failed
-                    ((List<string>)ViewData["validationIssues"]).Add("Email already in use.");
-                }
-            }
-            else //model state is invalid
-            {
-                foreach(ModelStateEntry state in ModelState.Values)
-                {
-                    foreach(ModelError error in state.Errors)
-                    {
-                        ((List<string>)ViewData["validationIssues"]).Add(error.ErrorMessage);
-                    }
-                }
             }
 
             return View();
@@ -142,7 +126,7 @@ namespace CustomerPortalCodeExercise.Controllers
         {
             if(LoggedInUser(out UserAccount account))
             {
-                return View(account);
+                return View(new UserAccountBuilder(account));
             }
             else
             {
@@ -153,15 +137,37 @@ namespace CustomerPortalCodeExercise.Controllers
         // POST: AccountController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit([FromForm] UserAccountBuilder userAccountAttempt)
         {
-            try
+            if(LoggedInUser(out UserAccount account))
             {
-                return RedirectToAction(nameof(Index));
+                UserAccount updatedFields = userAccountAttempt.CreateUserAccount(hasher);
+
+                //Check for which fields are being updated, since the forms are exclusive these checks will be as well.
+
+                //First or Last Name form:
+                if (!string.IsNullOrEmpty(updatedFields.FirstName)
+                    || !string.IsNullOrEmpty(updatedFields.LastName))
+                {
+                    accountService.UpdateAccountName(
+                        updatedFields.FirstName, updatedFields.LastName, account);
+                }
+                //Email form:
+                else if (!string.IsNullOrEmpty(updatedFields.Email))
+                {
+                    accountService.UpdateAccountEmail(updatedFields.Email, account);
+                }
+                //Password form
+                else if (!string.IsNullOrEmpty(updatedFields.PasswordHash))
+                {
+                    accountService.UpdateAccountPassword(updatedFields.PasswordHash, account);
+                }
+
+                return RedirectToAction("Details");
             }
-            catch
-            {
-                return View();
+            else
+            { 
+                return RedirectToAction("Login");
             }
         }
 

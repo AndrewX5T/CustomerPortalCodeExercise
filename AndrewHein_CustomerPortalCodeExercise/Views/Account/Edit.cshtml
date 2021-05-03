@@ -11,7 +11,8 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-controller="Account" asp-action="Edit" method="post">
+            <h4>Change Account Name</h4>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="FirstName" class="control-label"></label>
@@ -24,10 +25,28 @@
                 <span asp-validation-for="LastName" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <input type="hidden" asp-for="Identifier" value="@Model.Identifier" />
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+
+        <form asp-controller="Account" asp-action="Edit" method="post">
+            <h4>Change Account Email</h4>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
                 <label asp-for="Email" class="control-label"></label>
                 <input asp-for="Email" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
+            <div class="form-group">
+                <input type="hidden" asp-for="Identifier" value="@Model.Identifier" />
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+
+        <form asp-controller="Account" asp-action="Edit" method="post">
+            <h4>Change Account Password</h4>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Password" class="control-label"></label>
                 <input asp-for="Password" class="form-control" />
@@ -39,6 +58,7 @@
                 <span asp-validation-for="VerifyPassword" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <input type="hidden" asp-for="Identifier" value="@Model.Identifier" />
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>
@@ -46,9 +66,9 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-controller="Account" asp-action="Details">Back</a>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_Validationtial");}
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

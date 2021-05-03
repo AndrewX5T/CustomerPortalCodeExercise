@@ -9,12 +9,10 @@ namespace CustomerPortalCodeExercise.Modelstate
 {
     public class LoginAttempt
     {
-        [Display(Name = "Email Address")]
-        [DataType(DataType.EmailAddress)]
+        [Display(Name = "Email Address"), DataType(DataType.EmailAddress), EmailAddress, Required]
         public string Email { get; set; }
 
-        [Display(Name = "Password")]
-        [DataType(DataType.Password)]
+        [Display(Name = "Password"), DataType(DataType.Password), Required]
         public string Password { get; set; }
 
 

@@ -12,7 +12,9 @@ namespace DataAccessLayer
         public IAccountService LoadAccounts(IAccountStoringService accountStore);
         public IAccountService StoreAccounts(IAccountStoringService accountStore);
         public bool AddAccount(UserAccount account, IAccountStoringService accountStore);
-        public IAccountService UpdateAccount(UserAccount updatedAccount, UserAccount storedAccount);
+        public IAccountService UpdateAccountName(string firstName, string lastName, UserAccount storedAccount);
+        public IAccountService UpdateAccountEmail(string email, UserAccount storedAccount);
+        public IAccountService UpdateAccountPassword(string passwordHash,UserAccount storedAccount);
         public bool AccountExists(string emailAddress, out UserAccount matchAccount);
         public bool AccountExists(Guid identifer, out UserAccount matchAccount);
         public bool LoginAttemptValid(string emailAddress, string passwordHash, out UserAccount loginAccount);
@@ -78,75 +80,64 @@ namespace DataAccessLayer
         }
 
         /// <summary>
-        /// Check each property of stored account and provided updates, applying where different.
-        /// Factors in special requirements such as uniqueness.
+        /// Compare name inputs to stored names, if they are valid and not identical, update stored
         /// </summary>
         /// <param name="updatedAccount"></param>
         /// <param name="storedAccount"></param>
         /// <returns></returns>
-        public IAccountService UpdateAccount(UserAccount updatedAccount, UserAccount storedAccount)
+        public IAccountService UpdateAccountName(
+            string firstName, string lastName, UserAccount storedAccount)
         {
-            //here we loop through a collection of properties, comparing the value of each for changes
-            foreach (PropertyInfo prop in typeof(UserAccount).GetProperties())
+            if (!string.IsNullOrEmpty(firstName) //firstName not blank
+                && !storedAccount.FirstName.Equals(firstName)) //firstname not = to stored
             {
-                object stored = prop.GetValue(storedAccount);
-                object updated = prop.GetValue(updatedAccount);
-
-                //if the updated object differs from the stored, apply the update, contingent upon the property in question.
-                if (!stored.Equals(updated))
-                {
-                    switch (prop.Name)
-                    {
-                        case "Identifier":
-                            //We never want to change this value. Ignore it even if different.
-                            break;
-
-                        case "Email":
-                            //This is account-unique, special check to make sure it isn't duplicate
-                            UpdateEmail(updatedAccount, storedAccount);
-                            break;
-
-                        default:
-                            UpdateProperty(updatedAccount, storedAccount, prop);
-                            break;
-                    }
-                }
+                storedAccount.FirstName = firstName;
             }
+
+            if (!string.IsNullOrEmpty(lastName) //lastName not blank
+                && !storedAccount.FirstName.Equals(lastName)) //lastName not = to stored
+            {
+                storedAccount.LastName = lastName;
+            }
+
             return this;
         }
 
         /// <summary>
-        /// email change: as email is unique, first check that the new email is available, then update
+        /// Compare email to stored email, if valid and not already in use, update
         /// </summary>
         /// <param name="updatedAccount"></param>
         /// <param name="storedAccount"></param>
-        /// <returns>boolean: update was performed</returns>
-        bool UpdateEmail(UserAccount updatedAccount, UserAccount storedAccount)
+        /// <returns></returns>
+        public IAccountService UpdateAccountEmail(
+            string email, UserAccount storedAccount)
         {
-            if (!AccountExists(updatedAccount.Identifier, out _)) //this will test for an account with same email
+            if (!string.IsNullOrEmpty(email) //email not blank
+                && !storedAccount.Email.Equals(email) //email not = to stored
+                && !AccountExists(email, out _)) //email not already in use
             {
-                //Safe to proceed updating to the provided email
-                storedAccount.Email = updatedAccount.Email;
-
-                return true;
+                storedAccount.Email = email;
             }
-            return false;
+
+            return this;
         }
 
         /// <summary>
-        /// We know the account exists, just apply the change to one property (non-email)
-        /// Get the value of the updated property and apply it to the property of the stored account.
+        /// Compare password to stored password, if valid and not identical, update
         /// </summary>
         /// <param name="updatedAccount"></param>
         /// <param name="storedAccount"></param>
-        /// <returns>boolean: update was performed</returns>
-        bool UpdateProperty(UserAccount updatedAccount, UserAccount storedAccount, PropertyInfo prop)
+        /// <returns></returns>
+        public IAccountService UpdateAccountPassword(
+            string passwordHash, UserAccount storedAccount)
         {
-            object updatedProp = prop.GetValue(updatedAccount);
+            if (!string.IsNullOrEmpty(passwordHash) //password not blank
+                && !storedAccount.PasswordHash.Equals(passwordHash)) //password not = to stored
+            {
+                storedAccount.PasswordHash = passwordHash;
+            }
 
-            storedAccount.GetType().GetProperty(prop.Name).SetValue(storedAccount, updatedProp);
-
-            return true; //This doesn't feel right semantically, but this would ideally be a database update result or similar
+            return this;
         }
 
         /// <summary>
